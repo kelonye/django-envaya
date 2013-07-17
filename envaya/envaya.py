@@ -17,7 +17,7 @@ class Envaya(object):
         self.phone = req.POST['phone_number']
 
     def send(self, messages, event='send'):
-        logger.debug('SENDING')
+        logger.info('SENDING')
         def build_messages():
             for message in messages:
                 if isinstance(message, str):
@@ -26,8 +26,9 @@ class Envaya(object):
                         'to': to,
                         'message': message
                     }
-                logger.debug('\t\t{0}.to : {0}.message'.format(
-                    message
+                logger.info('%s : %s' % (
+                      message['to']
+                    , message['message']
                 ))
                 yield message
 
@@ -56,9 +57,9 @@ def validate_req(view):
 
 def log(view):
     def wrapper(req):
-        logger.debug('LOGS')
+        logger.info('RECEIVING')
         for k, v in req.POST.iteritems():
-            logger.debug('\t\t%s: %s' % (k, v))
+            logger.info('%s: %s' % (k, v))
         return view(req)
     return wrapper
 

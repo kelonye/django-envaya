@@ -51,7 +51,6 @@ class EnvayaT(TestCase):
         self.assertContains(res, 'message1')
 
     def test_send_back_to_sender(self):
-
         uri = reverse('receive2')
         data = {
             'phone_number': '254700111000'

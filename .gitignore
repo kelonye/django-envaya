@@ -1,4 +1,5 @@
+
 *.pyc
-build/
-envaya.egg-info/
+*.sqlite3
 dist
+envaya.egg-info

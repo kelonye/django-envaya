@@ -103,3 +103,28 @@ INSTALLED_APPS = TEST_EXCLUDE + (
 )
 
 TEST_RUNNER = 'django_test_exclude.runners.ExcludeTestSuiteRunner'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'formatters': {
+        'verbose': {
+            'format': ('%(levelname)s %(module)s %(process)d %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S%z'
+        }
+    },
+    'loggers': {
+        'envaya': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True
+        }
+    }
+}
