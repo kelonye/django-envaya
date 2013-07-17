@@ -1,0 +1,4 @@
+*.pyc
+build/
+envaya.egg-info/
+dist
