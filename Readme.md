@@ -23,7 +23,7 @@ def receive(req):
 Test
 ---
 
-    $ make
+    $ make deps test
 
 License
 ---
