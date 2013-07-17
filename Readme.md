@@ -6,6 +6,8 @@ Install
 Example
 ---
 
+```python
+
 import envaya
 
 @envaya.receive
@@ -16,7 +18,7 @@ def receive(req):
     , {'to': '254700111000', 'message':'heya'}
   ]
   return envaya.send(messages)
-
+```
 
 Test
 ---
