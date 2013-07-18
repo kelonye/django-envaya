@@ -10,33 +10,30 @@ from django.views.decorators.csrf import csrf_exempt
 logger = logging.getLogger('envaya')
 
 
-class Envaya(object):
+class Envaya(list):
 
     def __init__(self, req):
+        super(Envaya, self).__init__()
         self.req = req
-        self.phone = req.POST['phone_number']
+        self.phone_number = req.POST['phone_number']
 
-    def send(self, messages, event='send'):
+    def queue(self, message):
+        message.setdefault('event', 'send')
+        message.setdefault('to', self.phone_number)
+        self.append(message)
+
+    def send(self):
         logger.info('SENDING')
-        def build_messages():
-            for message in messages:
-                if isinstance(message, str):
-                    to = self.phone
-                    message = {
-                        'to': to,
-                        'message': message
-                    }
-                logger.info('%s : %s' % (
-                      message['to']
-                    , message['message']
-                ))
-                yield message
-
+        res = {}
+        for message in self:
+            logger.info(message)
+            event = message['event']
+            res.setdefault(event, [])
+            del message['event']
+            res[event].append(message)
+        events = [{'event': k, 'messages': v} for k, v in res.iteritems()]
         content = {
-            'events': [{
-               'event': event,
-               'messages': [m for m in build_messages()]
-            }]
+            'events': events
         }
         json_content = json.dumps(content)
         return HttpResponse(
@@ -69,6 +66,8 @@ def receive(view):
     @validate_req
     @log
     def wrapper(req):
-        req.envaya = Envaya(req)
-        return view(req)
+        envaya = Envaya(req)
+        req.queue = envaya.queue
+        view(req)
+        return envaya.send()
     return wrapper

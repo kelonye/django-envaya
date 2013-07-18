@@ -2,14 +2,13 @@ import envaya
 
 @envaya.receive
 def receive1(req):
-    messages = [
-        'message1'
-    ]
-    return req.envaya.send(messages)
+    req.queue({
+        'message': 'message1'
+    })
 
 @envaya.receive
 def receive2(req):
-    messages = [
-        {'to': '254700111000', 'message':'message2'}
-    ]
-    return req.envaya.send(messages)
+    req.queue({
+        'to': '254700111000',
+        'message': 'message2'
+    })

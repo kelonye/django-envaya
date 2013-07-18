@@ -12,12 +12,21 @@ import envaya
 
 @envaya.receive
 def receive(req):
+
   print req.POST
-  messages = [
-      'received' # send back to source
-    , {'to': '254700111000', 'message':'heya'}
-  ]
-  return req.envaya.send(messages, event='cancel')
+
+  req.queue({
+      'event': 'cancel'
+    , 'message': 'hello'
+  })
+
+  req.queue({
+      'event': 'send'
+    , 'to': '254700111000'
+    , 'message': 'hello'
+  })
+
+
 ```
 
 Test
