@@ -15,11 +15,13 @@ def receive(req):
 
   print req.POST
 
+  # send a message back to source
   req.queue({
       'event': 'cancel'
     , 'message': 'hello'
   })
 
+  # send a message to `to`
   req.queue({
       'event': 'send'
     , 'to': '254700111000'
