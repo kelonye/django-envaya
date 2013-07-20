@@ -46,7 +46,7 @@ def validate_req(view):
         if req.method != 'POST':
             return HttpResponse(status=405)
         if not req.POST.get('phone_number', None):
-            e = 'invalid request phone_number'
+            e = 'invalid request phone_number\n'
             return HttpResponse(e, status=400)
         return view(req)
     return wrapper
