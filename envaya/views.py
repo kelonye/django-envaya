@@ -17,7 +17,7 @@ class Envaya(list):
         super(Envaya, self).__init__()
         self.req = req
         self.msg = InboxMessage.objects.create(
-            dump=json.dumps(req.POST.dict())
+            dump=json.dumps(req.POST)
         )
 
         if self.msg.action == self.msg.ACTIONS[1]: #incoming
