@@ -10,7 +10,8 @@ Use
 
 from envaya.views import receive
 
-@receive
+# receive msgs from a phone running envaya
+@receive('254700111000')
 def handle(req):
 
   print req.POST
