@@ -17,7 +17,7 @@ class OutboxAdmin(admin.ModelAdmin):
     ]
 
     def status(self, msg):
-        if not msg.send_status.status:
+        if not msg.send_status:
             return
         return msg.send_status.status
 
