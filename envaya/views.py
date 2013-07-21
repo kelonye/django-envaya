@@ -73,7 +73,7 @@ class Envaya(list):
 
 def validate(req, attr):
     if req.POST.get(attr, None) == None:
-        e = 'invalid request ' + attr + '\n'
+        e = 'invalid request ' + attr
         raise Exception(e)
 
 
@@ -90,6 +90,9 @@ def validate_req(phone_number):
                     validate(req, attr)
                 except Exception, e:
                     return HttpResponse(e, status=400)
+            if req.POST['action'] not in InboxMessage.ACTIONS.values():
+                e = 'invalid request action'
+                return HttpResponse(e, status=400)
             if phone_number != req.POST['phone_number']:
                 e = 'request is from a forbiddened number'
                 return HttpResponse(e, status=403)

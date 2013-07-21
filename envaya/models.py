@@ -31,6 +31,12 @@ class InboxMessage(models.Model):
     dump = models.TextField(
     )
 
+    def __unicode__(self):
+        return '%s: %s' % (
+              self.date_received
+            , self.action
+        )
+
     @property
     def toJSON(self):
         return json.loads(self.dump)
@@ -92,7 +98,9 @@ class InboxMessage(models.Model):
 # we won't be saving cancel, cancel_all, log and settings events
 # we also won't be prioritizing outgoing send events
 class OutboxMessage(models.Model):
-
+    date_sent = models.DateTimeField(
+        default=datetime_now_tz
+    )
     to = models.CharField(
         max_length=20
     )
@@ -104,6 +112,12 @@ class OutboxMessage(models.Model):
         , blank=True
         , null=True
     )
+
+    def __unicode__(self):
+        return '%s: %s' % (
+              self.date_sent
+            , self.to
+        )
 
     @property
     def toDICT(self):
