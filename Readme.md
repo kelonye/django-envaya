@@ -3,10 +3,33 @@ Install
 
     $ pip install envaya
 
-Example
+Use
 ---
 
 ```python
+
+# settings.py
+
+INSTALLED_APPS = (
+  'messages',
+  'envaya',
+)
+
+# message/models.py
+
+from envaya.models import InboxMessage, OutboxMessage
+
+@receiver(post_save, sender=InboxMessage)
+def on_saved_inbox_message(sender, instance, created, **kwargs):
+  print instance.action
+
+@receiver(post_save, sender=OutboxMessage)
+def on_saved_outbox_message(sender, instance, created, **kwargs):
+  if not created:
+    print instance.send_status.status
+    print instance.send_status.error
+
+# message/views.py
 
 import envaya
 
@@ -15,12 +38,6 @@ def receive(req):
 
   print req.POST
 
-  # send a message back to source
-  req.queue({
-      'event': 'cancel'
-    , 'message': 'hello'
-  })
-
   # send a message to `to`
   req.queue({
       'event': 'send'
@@ -28,6 +45,15 @@ def receive(req):
     , 'message': 'hello'
   })
 
+
+# message/admin.py
+
+
+# message/urls.py
+
+urlpatterns = patterns('message.views',
+    url(r'^receive/$', 'receive', name='receive'),
+)
 
 ```
 

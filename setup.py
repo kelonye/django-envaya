@@ -9,6 +9,7 @@ setup(
     author='Mitchel Kelonye',
     author_email='kelonyemitchel@gmail.com',
     url='https://github.com/kelonye/django-envaya',
+    requires=['Django (>=1.3.0)', 'pytz==2013b'],
     packages=find_packages(),
     license='MIT License',
     zip_safe=True)
