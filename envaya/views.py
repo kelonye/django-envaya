@@ -35,7 +35,9 @@ class Envaya(list):
             self.queue(msg.toDICT)
 
     def mark_send_status(self):
-        pass
+        msg = OutboxMessage.objects.get(pk=self.msg.id)
+        msg.send_status = self.msg
+        msg.save()
 
     def queue(self, message):
         frm = self.msg.phone_number
@@ -127,7 +129,6 @@ def validate_send_status_req(view):
             for attr in [
                   'id'
                 , 'status'
-                , 'message'
                 , 'error'
             ]:
                 try:
