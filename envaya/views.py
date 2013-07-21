@@ -32,7 +32,7 @@ class Envaya(list):
             send_status=None
         )
         for msg in unsent_messages:
-            req.queue(msg.toDICT)
+            self.queue(msg.toDICT)
 
     def mark_send_status(self):
         pass

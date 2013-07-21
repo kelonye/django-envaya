@@ -59,6 +59,14 @@ class IncomingRequestTestCase(TestCase):
         }
         res = self.client.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
+        #
+        # assert req was logged
+        assert InboxMessage.objects.all().count() == 1
+        msg = InboxMessage.objects.get()
+        assert msg.action == 'incoming'
+        assert msg.frm == '254700111999'
+        #
+        # res data
         data = json.loads(res.content)
         # assert can send to sender
         assert data['events']
@@ -72,7 +80,7 @@ class IncomingRequestTestCase(TestCase):
         assert msg['to'] == '254700111444'
         assert msg['message'] == 'outgoing2'
 
-@unittest.skip('')
+
 class OutgoingRequestTestCase(TestCase):
 
     uri = reverse('receive_outgoing')
@@ -92,8 +100,15 @@ class OutgoingRequestTestCase(TestCase):
     def test_response(self):
         data = {
         }
-        res = self.client.POST(uri, data)
+        res = self.client.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
+        #
+        # assert req was logged
+        assert InboxMessage.objects.all().count() == 1
+        msg = InboxMessage.objects.get()
+        assert msg.action == 'outgoing'
+        #
+        # res data
         data = json.loads(res.content)
         # assert message is queued
         assert data['events']
@@ -101,5 +116,5 @@ class OutgoingRequestTestCase(TestCase):
         assert event['event'] == 'send'
         assert len(event['messages']) == 1
         msg = event['messages'][0]
-        assert msg['to'] == '254700111000'
+        assert msg['to'] == '254700111999'
         assert msg['message'] == 'outgoing'
