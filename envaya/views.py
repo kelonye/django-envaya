@@ -43,6 +43,11 @@ class Envaya(list):
             frm = self.msg.frm
         message.setdefault('event', 'send')
         message.setdefault('to', frm)
+        outboxMsg = OutboxMessage.objects.create(
+              to=message['to']
+            , message=message['message']
+        )
+        message['id'] = outboxMsg.pk
         self.append(message)
 
     def send(self):
@@ -70,21 +75,26 @@ def validate(req, attr):
         raise Exception(e)
 
 
-def validate_req(view):
-    def wrapper(req):
-        if req.method != 'POST':
-            return HttpResponse(status=405)
-        for attr in [
-              'phone_number'
-            , 'action'
-        ]:
-            try:
-                validate(req, attr)
-            except Exception, e:
-                return HttpResponse(e, status=400)
-        return view(req)
+def validate_req(phone_number):
+    def wrapper(view):
+        def func(req):
+            if req.method != 'POST':
+                return HttpResponse(status=405)
+            for attr in [
+                  'phone_number'
+                , 'action'
+            ]:
+                try:
+                    validate(req, attr)
+                except Exception, e:
+                    return HttpResponse(e, status=400)
+            if phone_number != req.POST['phone_number']:
+                e = 'request is from a forbiddened number'
+                return HttpResponse(e, status=403)
+            return view(req)
+        func.func_name = view.func_name
+        return func
     return wrapper
-
 
 def validate_incoming_req(view):
     def wrapper(req):
@@ -137,17 +147,20 @@ def log(view):
     return wrapper
 
 
-def receive(view):
-    @csrf_exempt
-    @validate_req
-    @validate_incoming_req
-    @validate_outgoing_req
-    @validate_send_status_req
-    @log
-    def wrapper(req):
-        envaya = Envaya(req)
-        req.envaya = envaya
-        req.queue = envaya.queue
-        view(req)
-        return envaya.send()
+def receive(phone_number):
+    def wrapper(view):
+        @csrf_exempt
+        @validate_req(phone_number)
+        @validate_incoming_req
+        @validate_outgoing_req
+        @validate_send_status_req
+        @log
+        def func(req):
+            envaya = Envaya(req)
+            req.envaya = envaya
+            req.queue = envaya.queue
+            view(req)
+            return envaya.send()
+        func.func_name = view.func_name
+        return func
     return wrapper

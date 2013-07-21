@@ -1,14 +1,21 @@
 from envaya.views import receive
 
-@receive
-def receive1(req):
+@receive('254700111000')
+def receive_incoming(req):
     req.queue({
-        'message': 'message1'
+        'message': 'outgoing1'
     })
-
-@receive
-def receive2(req):
     req.queue({
         'to': '254700111444',
-        'message': 'message2'
+        'message': 'outgoing2'
     })
+
+
+@receive('254700111000')
+def receive_outgoing(req):
+    pass
+
+
+@receive('254700111000')
+def receive_send_status(req):
+    pass
