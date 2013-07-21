@@ -9,6 +9,6 @@ def receive1(req):
 @receive
 def receive2(req):
     req.queue({
-        'to': '254700111000',
+        'to': '254700111444',
         'message': 'message2'
     })

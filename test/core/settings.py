@@ -94,6 +94,7 @@ TEST_EXCLUDE = (
     , 'django.contrib.sites'
     , 'django.contrib.messages'
     , 'django.contrib.staticfiles'
+    , 'envaya'
     ,
 )
 

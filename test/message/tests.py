@@ -6,14 +6,7 @@ from django.utils import simplejson as json
 from models import InboxMessage, OutboxMessage
 
 
-FIXTURES = (
-    'users'
-)
-
-
-class UrlsTestCase(TestCase):
-
-    fixtures = FIXTURES
+class RequestTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
@@ -31,36 +24,62 @@ class UrlsTestCase(TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertEqual(res.content, 'invalid request phone_number\n')
 
-    def test_response_format(self):
+    def test_req_must_have_action_property(self):
         uri = reverse('receive1')
         data = {
             'phone_number': '254700111000'
         }
         res = self.client.post(uri, data)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.content, 'invalid request action\n')
+
+
+class IncomingRequestTestCase(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        def POST(uri, data):
+            data.setdefault('phone_number', '254700111000')
+            data.setdefault('action', 'incoming')
+            return self.client.post(uri, data)
+        self.client.POST = POST
+
+    def test_response_format(self):
+        uri = reverse('receive1')
+        data = {
+        }
+        res = self.client.POST(uri, data)
+        self.assertEqual(res.status_code, 400)
+
+        data = {
+              'from': '254700111999'
+            , 'message_type': ''
+            , 'message': ''
+            , 'timestamp': ''
+        }
+        res = self.client.POST(uri, data)
         self.assertEqual(res.status_code, 200)
         data = json.loads(res.content)
         assert data['events']
         assert data['events'][0]['event'] == 'send'
         assert data['events'][0]['messages']
+        msg = data['events'][0]['messages'][0]
+        assert msg['to'] == '254700111999'
+        assert msg['message'] == 'message1'
 
-    def test_send_to_phone_number(self):
-        uri = reverse('receive1')
-        data = {
-            'phone_number': '254700111000'
-        }
-        res = self.client.post(uri, data)
-        self.assertEqual(res.status_code, 200)
-        self.assertContains(res, 'message1')
-
-    def test_send_back_to_sender(self):
         uri = reverse('receive2')
         data = {
-            'phone_number': '254700111000'
+              'from': '254700111999'
+            , 'message_type': ''
+            , 'message': ''
+            , 'timestamp': ''
         }
-        res = self.client.post(uri, data)
+        res = self.client.POST(uri, data)
         self.assertEqual(res.status_code, 200)
-        self.assertContains(res, 'message2')
-
-
-class ModelsTestCase(TestCase):
-    pass
+        data = json.loads(res.content)
+        assert data['events']
+        assert data['events'][0]['event'] == 'send'
+        assert data['events'][0]['messages']
+        msg = data['events'][0]['messages'][0]
+        assert msg['to'] == '254700111444'
+        assert msg['message'] == 'message2'

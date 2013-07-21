@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import pytz
+from datetime import datetime
 from django.db import models
 from django.dispatch import receiver
+from django.utils import simplejson as json
+from django.db.models.signals import post_save, pre_save
 
 
 def datetime_now_tz():
@@ -15,12 +18,12 @@ def datetime_now_tz():
 class InboxMessage(models.Model):
 
     ACTIONS = {
-          'outgoing': 1
-        , 'incoming': 2
-        , 'send_status': 3
-        , 'device_status': 4
-        , 'amqp_started': 5
-        , 'forward_sent': 6
+          1 : 'incoming'
+        , 2: 'outgoing'
+        , 3: 'send_status'
+        , 4: 'device_status'
+        , 5: 'amqp_started'
+        , 6: 'forward_sent'
     }
     date_received = models.DateTimeField(
         default=datetime_now_tz
@@ -29,11 +32,11 @@ class InboxMessage(models.Model):
     )
 
     @property
-    def JSON(self):
+    def toJSON(self):
         return json.loads(self.dump)
 
     def get(self, attr):
-        return self.JSON.get(attr, '')
+        return self.toJSON.get(attr, '')
 
     @property
     def phone_number(self):
@@ -46,7 +49,7 @@ class InboxMessage(models.Model):
     # action=incoming properties
     @property
     def frm(self):
-        return self.get('frm')
+        return self.get('from')
 
     @property
     def message_type(self):
@@ -60,17 +63,13 @@ class InboxMessage(models.Model):
     def timestamp(self):
         return self.get('timestamp')
 
-    @property
-    def mms_parts(self):
-        return self.get('mms_parts')
-
     # action=outgoing properties
 
     # action=send_status properties
     @property
     def outbox_message(self):
         pk = self.get('id')
-        return OutboxMeesage.objects.get(
+        return OutboxMessage.objects.get(
             pk=pk
         )
 
@@ -105,3 +104,11 @@ class OutboxMessage(models.Model):
         , blank=True
         , null=True
     )
+
+    @property
+    def toDICT(self):
+        return {
+              'id': self.pk
+            , 'to': self.to
+            , 'message': self.message
+        }
