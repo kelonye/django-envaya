@@ -12,7 +12,6 @@ setup(
     requires=[
           'Django (>=1.3.0)'
         , 'pytz (>=2013b)'
-        , 'South (>=0.7.6)'
     ],
     packages=find_packages(),
     license='MIT License',
