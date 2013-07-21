@@ -2,14 +2,16 @@ import unittest
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
-from models import User
-from envaya import json
+from django.utils import simplejson as json
+from models import InboxMessage, OutboxMessage
+
 
 FIXTURES = (
     'users'
 )
 
-class EnvayaT(TestCase):
+
+class UrlsTestCase(TestCase):
 
     fixtures = FIXTURES
 
@@ -27,7 +29,7 @@ class EnvayaT(TestCase):
         }
         res = self.client.post(uri, data)
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(res.content, 'invalid request phone_number')
+        self.assertEqual(res.content, 'invalid request phone_number\n')
 
     def test_response_format(self):
         uri = reverse('receive1')
@@ -58,3 +60,7 @@ class EnvayaT(TestCase):
         res = self.client.post(uri, data)
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, 'message2')
+
+
+class ModelsTestCase(TestCase):
+    pass

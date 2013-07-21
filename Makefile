@@ -11,6 +11,6 @@ publish:
 	@python setup.py sdist upload
 
 clean:
-	@rm -rf build dist envaya.egg-info $(shell find -name ='*.pyc')
+	@rm -rf build dist envaya.egg-info $(shell find -name '*.pyc')
 
 .PHONY: clean publish deps example test

@@ -7,8 +7,8 @@
     is_staff: true
     is_superuser: true
     last_login: !!timestamp '2013-06-16 14:46:26+00:00'
-    password: pbkdf2_sha256$10000$329jYaCLfegy$9dFfKdWE61l8Vf7/8nKWh4Pi18bbUEJrdovrNCdJpwY=
+    password: pbkdf2_sha256$10000$Re4R5kQLWKmc$WPYZlz8FWeZhGsdQKH2zMu7FddxVGcA1eRGTiZMzN1s=
     user_permissions: []
-    username: tj
+    username: admin
   model: auth.user
   pk: 1

@@ -1,12 +1,12 @@
-import envaya
+from envaya.views import receive
 
-@envaya.receive
+@receive
 def receive1(req):
     req.queue({
         'message': 'message1'
     })
 
-@envaya.receive
+@receive
 def receive2(req):
     req.queue({
         'to': '254700111000',

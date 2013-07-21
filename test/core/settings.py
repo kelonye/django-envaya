@@ -99,6 +99,7 @@ TEST_EXCLUDE = (
 
 INSTALLED_APPS = TEST_EXCLUDE + (
       'core'
+    , 'message'
     , 
 )
 
