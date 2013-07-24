@@ -26,6 +26,7 @@ class RequestTestCase(TestCase):
     def test_must_be_from_the_specified_no(self):
         data = {
               'phone_number': '254700111001'
+            , 'password': 't'
             , 'action': 'incoming'
         }
         res = self.client.post(self.uri, data)
