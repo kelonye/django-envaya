@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+import sys
+import sha
 import json
+import hashlib
 import logging
-
 from django.http import HttpResponse
 from django.utils import simplejson as json
 from django.views.decorators.csrf import csrf_exempt
@@ -19,7 +21,6 @@ class Envaya(list):
         self.msg = InboxMessage.objects.create(
             dump=json.dumps(req.POST)
         )
-
         if self.msg.action == self.msg.ACTIONS[1]: #incoming
             pass
         elif self.msg.action == self.msg.ACTIONS[2]: #outgoing
@@ -32,10 +33,12 @@ class Envaya(list):
             send_status=None
         )
         for msg in unsent_messages:
-            self.queue(msg.toDICT)
+            msg = msg.toDICT
+            msg['event'] = 'send'
+            self.append(msg)
 
     def mark_send_status(self):
-        msg = OutboxMessage.objects.get(pk=self.msg.id)
+        msg = self.msg.outbox_message
         msg.send_status = self.msg
         msg.save()
 
@@ -53,7 +56,8 @@ class Envaya(list):
         self.append(message)
 
     def send(self):
-        logger.info('SENDING')
+        if len(self) != 0:
+            logger.info('SENDING')
         res = {}
         for message in self:
             logger.info(message)
@@ -66,6 +70,7 @@ class Envaya(list):
             'events': events
         }
         json_content = json.dumps(content)
+        print json_content
         return HttpResponse(
             json_content, content_type='application/json'
         )
@@ -77,9 +82,13 @@ def validate(req, attr):
         raise Exception(e)
 
 
-def validate_req(phone_number):
+def validate_req(phone_number, password):
     def wrapper(view):
         def func(req):
+            req.auth_params = {
+                  'phone_number': phone_number
+                , 'password': password
+            }
             if req.method != 'POST':
                 return HttpResponse(status=405)
             for attr in [
@@ -100,6 +109,33 @@ def validate_req(phone_number):
         func.func_name = view.func_name
         return func
     return wrapper
+
+def auth_req(view):
+    def wrapper(req):
+
+        if len(sys.argv) > 1 and sys.argv[1] == 'test':
+            return view(req)
+
+        def ksort(d):
+            return [k for k in sorted(d.keys())]
+
+        data = req.POST.copy()
+        data_string = req.build_absolute_uri(req.get_full_path())
+        for k in ksort(data):
+            v = data[k]
+            data_string += ',%s=%s' % (k, v)
+        data_string += ',' + req.auth_params['password']
+
+        sig = req.META['HTTP_X_REQUEST_SIGNATURE']
+        generated_sig = sha.new(data_string).digest().encode('base64')
+
+        if sig.strip() != generated_sig.strip():
+            e = 'wrong phone/password combination'
+            return HttpResponse(e, status=403)
+
+        return view(req)
+    return wrapper
+
 
 def validate_incoming_req(view):
     def wrapper(req):
@@ -151,10 +187,11 @@ def log(view):
     return wrapper
 
 
-def receive(phone_number):
+def receive(phone_number, password):
     def wrapper(view):
         @csrf_exempt
-        @validate_req(phone_number)
+        @validate_req(phone_number, password)
+        @auth_req
         @validate_incoming_req
         @validate_outgoing_req
         @validate_send_status_req
@@ -162,7 +199,6 @@ def receive(phone_number):
         def func(req):
             envaya = Envaya(req)
             req.envaya = envaya
-            req.queue = envaya.queue
             view(req)
             return envaya.send()
         func.func_name = view.func_name

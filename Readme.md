@@ -17,7 +17,7 @@ def handle(req):
   print req.POST
 
   # send a message to `to`
-  req.queue({
+  req.envaya.queue({
       'event': 'send'
     , 'to': '254700111000'
     , 'message': 'hello'
