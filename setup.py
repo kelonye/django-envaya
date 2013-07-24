@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='envaya',
-    version='0.0.3',
+    version='0.0.4',
     description='Tiny envaya utility',
     author='Mitchel Kelonye',
     author_email='kelonyemitchel@gmail.com',
