@@ -11,7 +11,7 @@ Use
 from envaya.views import receive
 
 # receive msgs from a phone running envaya
-@receive('254700111000')
+@receive('254700111000', 'password')
 def handle(req):
 
   print req.POST
