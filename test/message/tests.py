@@ -56,12 +56,12 @@ class IncomingRequestTestCase(TestCase):
             data.setdefault('phone_number', '254700111000')
             data.setdefault('action', 'incoming')
             return self.client.post(uri, data)
-        self.client.POST = POST
+        self.POST = POST
 
     def test_should_have_required_props(self):
         data = {
         }
-        res = self.client.POST(self.uri, data)
+        res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 400)
 
     def test_response(self):
@@ -71,7 +71,7 @@ class IncomingRequestTestCase(TestCase):
             , 'message': ''
             , 'timestamp': ''
         }
-        res = self.client.POST(self.uri, data)
+        res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
         #
         # assert req was logged
@@ -103,7 +103,7 @@ class OutgoingRequestTestCase(TestCase):
             data.setdefault('phone_number', '254700111000')
             data.setdefault('action', 'outgoing')
             return self.client.post(uri, data)
-        self.client.POST = POST
+        self.POST = POST
 
     def test_response(self):
         send_status = InboxMessage.objects.create(
@@ -120,7 +120,7 @@ class OutgoingRequestTestCase(TestCase):
         )
         data = {
         }
-        res = self.client.POST(self.uri, data)
+        res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
         #
         # assert req was logged
@@ -150,12 +150,12 @@ class SendstatusRequestTestCase(TestCase):
             data.setdefault('phone_number', '254700111000')
             data.setdefault('action', 'send_status')
             return self.client.post(uri, data)
-        self.client.POST = POST
+        self.POST = POST
 
     def test_should_have_required_props(self):
         data = {
         }
-        res = self.client.POST(self.uri, data)
+        res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 400)
 
     def test_response(self):
@@ -168,7 +168,7 @@ class SendstatusRequestTestCase(TestCase):
             , 'status': 'failed'
             , 'error': 'invalid receipient phone number'
         }
-        res = self.client.POST(self.uri, data)
+        res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
         #
         # assert req was logged
