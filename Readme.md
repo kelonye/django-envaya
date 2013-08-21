@@ -1,14 +1,14 @@
 Install
 ---
 
-    $ pip install envaya
+    $ pip install django_envaya
 
 Use
 ---
 
 ```python
 
-from envaya import receive
+from django_envaya import receive
 
 # receive msgs from a phone running envaya
 @receive('254700111000', 'password')

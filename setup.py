@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='envaya',
+    name='django-envaya',
     version='0.0.4',
     description='Tiny envaya utility',
     author='Mitchel Kelonye',
@@ -12,7 +12,7 @@ setup(
     requires=[
         'Django (>=1.3.0)', 'pytz'
     ],
-    packages=['envaya',],
-    package_dir = {'envaya': 'lib'},
+    packages=['django_envaya',],
+    package_dir = {'django_envaya': 'lib'},
     license='MIT License',
     zip_safe=True)

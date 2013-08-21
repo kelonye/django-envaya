@@ -2,4 +2,4 @@
 *.pyc
 *.sqlite3
 dist
-envaya.egg-info
+django_envaya.egg-info

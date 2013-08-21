@@ -70,7 +70,6 @@ class Envaya(list):
             'events': events
         }
         json_content = json.dumps(content)
-        print json_content
         return HttpResponse(
             json_content, content_type='application/json'
         )
