@@ -37,14 +37,15 @@ class RequestTestCase(TestCase):
 
 class TestRequestTestCase(TestCase):
 
-    def setUp(self):
+    def test_must_return_ok(self):
         data = {
               'phone_number': '254700111000'
             , 'action': 'test'
         }
         client = Client()
-        res = client.post(uri, data)
+        res = client.post(self.uri, data)
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.content, 'OK')
 
 
 class IncomingRequestTestCase(TestCase):
