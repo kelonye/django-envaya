@@ -6,9 +6,11 @@ from django.utils import simplejson as json
 from lib.models import InboxMessage, OutboxMessage
 
 
-class RequestTestCase(TestCase):
+class TestCase(TestCase):
 
     uri = reverse('receive')
+
+class RequestTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
@@ -35,8 +37,6 @@ class RequestTestCase(TestCase):
 
 class TestRequestTestCase(TestCase):
 
-    uri = reverse('receive')
-
     def setUp(self):
         data = {
               'phone_number': '254700111000'
@@ -48,8 +48,6 @@ class TestRequestTestCase(TestCase):
 
 
 class IncomingRequestTestCase(TestCase):
-
-    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()
@@ -98,8 +96,6 @@ class IncomingRequestTestCase(TestCase):
 
 class OutgoingRequestTestCase(TestCase):
 
-    uri = reverse('receive')
-
     def setUp(self):
         self.client = Client()
         def POST(uri, data):
@@ -146,8 +142,6 @@ class OutgoingRequestTestCase(TestCase):
 
 
 class SendstatusRequestTestCase(TestCase):
-
-    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()
