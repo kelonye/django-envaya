@@ -12,18 +12,8 @@ urlpatterns = patterns('message.views',
         include(admin.site.urls)
     ),
     url(
-          r'^receive_incoming/$'
-        , 'receive_incoming'
-        , name='receive_incoming'
-    ),
-    url(
-          r'^receive_outgoing/$'
-        , 'receive_outgoing'
-        , name='receive_outgoing'
-    ),
-    url(
-          r'^receive_send_status/$'
-        , 'receive_send_status'
-        , name='receive_send_status'
-    ),
+          r'^receive/$'
+        , 'receive'
+        , name='receive'
+    )
 )

@@ -8,7 +8,7 @@ Use
 
 ```python
 
-from envaya.views import receive
+from envaya import receive
 
 # receive msgs from a phone running envaya
 @receive('254700111000', 'password')

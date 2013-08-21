@@ -3,12 +3,12 @@ from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.utils import simplejson as json
-from models import InboxMessage, OutboxMessage
+from lib.models import InboxMessage, OutboxMessage
 
 
 class RequestTestCase(TestCase):
 
-    uri = reverse('receive_incoming')
+    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()
@@ -33,9 +33,23 @@ class RequestTestCase(TestCase):
         self.assertEqual(res.status_code, 403)
 
 
+class TestRequestTestCase(TestCase):
+
+    uri = reverse('receive')
+
+    def setUp(self):
+        data = {
+              'phone_number': '254700111000'
+            , 'action': 'test'
+        }
+        client = Client()
+        res = client.post(uri, data)
+        self.assertEqual(res.status_code, 200)
+
+
 class IncomingRequestTestCase(TestCase):
 
-    uri = reverse('receive_incoming')
+    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()
@@ -84,7 +98,7 @@ class IncomingRequestTestCase(TestCase):
 
 class OutgoingRequestTestCase(TestCase):
 
-    uri = reverse('receive_outgoing')
+    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()
@@ -133,7 +147,7 @@ class OutgoingRequestTestCase(TestCase):
 
 class SendstatusRequestTestCase(TestCase):
 
-    uri = reverse('receive_send_status')
+    uri = reverse('receive')
 
     def setUp(self):
         self.client = Client()

@@ -24,6 +24,7 @@ class InboxMessage(models.Model):
         , 4: 'device_status'
         , 5: 'amqp_started'
         , 6: 'forward_sent'
+        , 7: 'test'
     }
     date_received = models.DateTimeField(
         default=datetime_now_tz
