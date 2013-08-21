@@ -1,4 +1,4 @@
-from envaya.views import receive
+from lib.views import receive
 
 
 @receive('254700111000', 't')

@@ -9,6 +9,7 @@ deps:
 
 publish:
 	@python setup.py sdist upload
+	@$(MAKE) clean
 
 clean:
 	@$(MAKE) clean -sC test/
