@@ -68,7 +68,7 @@ class IncomingRequestTestCase(TestCase):
         data = {
               'from': '254700111999'
             , 'message_type': ''
-            , 'message': ''
+            , 'message': 'hello'
             , 'timestamp': ''
         }
         res = self.POST(self.uri, data)
@@ -77,7 +77,7 @@ class IncomingRequestTestCase(TestCase):
         # assert req was logged
         assert InboxMessage.objects.all().count() == 1
         msg = InboxMessage.objects.get()
-        assert msg.action == 'incoming'
+        assert msg.message == 'hello'
         assert msg.frm == '254700111999'
         #
         # res data
@@ -106,29 +106,30 @@ class OutgoingRequestTestCase(TestCase):
         self.POST = POST
 
     def test_response(self):
-        send_status = InboxMessage.objects.create(
-            dump=''
+        OutboxMessage.objects.create(
+              to='254700111222'
+            , message='outgoing'
+            , send_status='queued'
         )
         OutboxMessage.objects.create(
-              to='254700111888'
+              to='254700111333'
             , message='outgoing'
-            , send_status=send_status
+            , send_status='failed'
         )
         OutboxMessage.objects.create(
-              to='254700111999'
+              to='254700111444'
             , message='outgoing'
+            , send_status='cancelled'
+        )
+        OutboxMessage.objects.create(
+              to='254700111555'
+            , message='outgoing'
+            , send_status='sent'
         )
         data = {
         }
         res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
-        #
-        # assert req was logged
-        send_status.delete()
-        assert InboxMessage.objects.all().count() == 1
-        msg = InboxMessage.objects.get()
-        assert msg.action == 'outgoing'
-        #
         # res data
         data = json.loads(res.content)
         # assert message is queued
@@ -138,7 +139,7 @@ class OutgoingRequestTestCase(TestCase):
         # assert queued up only 1 unsent msg
         assert len(event['messages']) == 1
         msg = event['messages'][0]
-        assert msg['to'] == '254700111999'
+        assert msg['to'] == '254700111222'
         assert msg['message'] == 'outgoing'
 
 
@@ -159,22 +160,18 @@ class SendstatusRequestTestCase(TestCase):
         self.assertEqual(res.status_code, 400)
 
     def test_response(self):
-        outboxmsg = OutboxMessage.objects.create(
+        outbox_message = OutboxMessage.objects.create(
               to='254700111999'
             , message='outgoing'
         )
         data = {
-              'id': str(outboxmsg.pk)
+              'id': str(outbox_message.pk)
             , 'status': 'failed'
             , 'error': 'invalid receipient phone number'
         }
         res = self.POST(self.uri, data)
         self.assertEqual(res.status_code, 200)
         #
-        # assert req was logged
-        assert InboxMessage.objects.all().count() == 1
-        msg = InboxMessage.objects.get()
-        assert msg.action == 'send_status'
-        #
-        outboxmsg = OutboxMessage.objects.get(pk=outboxmsg.pk)
-        assert outboxmsg.send_status == msg
+        outbox_message = OutboxMessage.objects.get(pk=outbox_message.pk)
+        assert outbox_message.send_status == 'failed'
+        assert outbox_message.send_error == 'invalid receipient phone number'

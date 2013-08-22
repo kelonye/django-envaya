@@ -7,7 +7,7 @@ import logging
 from django.http import HttpResponse
 from django.utils import simplejson as json
 from django.views.decorators.csrf import csrf_exempt
-from models import InboxMessage, OutboxMessage
+from models import InboxMessage, OutboxMessage, ACTIONS
 
 
 logger = logging.getLogger('envaya')
@@ -18,19 +18,22 @@ class Envaya(list):
     def __init__(self, req):
         super(Envaya, self).__init__()
         self.req = req
-        self.msg = InboxMessage.objects.create(
-            dump=json.dumps(req.POST)
-        )
-        if self.msg.action == self.msg.ACTIONS[1]: #incoming
-            pass
-        elif self.msg.action == self.msg.ACTIONS[2]: #outgoing
+        if self.req.POST['action'] == ACTIONS[1]: #incoming
+            self.save_incoming_message()
+        elif self.req.POST['action'] == ACTIONS[2]: #outgoing
             self.queue_unsent_messages()
-        elif self.msg.action == self.msg.ACTIONS[3]: #send_status
+        elif self.req.POST['action'] == ACTIONS[3]: #send_status
             self.mark_send_status()
+
+    def save_incoming_message(self):
+        InboxMessage.objects.create(
+            frm=self.req.POST['from'],
+            message=self.req.POST['message']
+        )
 
     def queue_unsent_messages(self):
         unsent_messages = OutboxMessage.objects.filter(
-            send_status=None
+            send_status='queued'
         )
         for msg in unsent_messages:
             msg = msg.toDICT
@@ -38,21 +41,23 @@ class Envaya(list):
             self.append(msg)
 
     def mark_send_status(self):
-        msg = self.msg.outbox_message
-        msg.send_status = self.msg
+        pk = self.req.POST['id']
+        msg = OutboxMessage.objects.get(pk=pk)
+        msg.send_status = self.req.POST['status']
+        msg.send_error = self.req.POST['error']
         msg.save()
 
     def queue(self, message):
-        frm = self.msg.phone_number
-        if self.msg.action == self.msg.ACTIONS[1]:
-            frm = self.msg.frm
+        frm = self.req.POST['phone_number']
+        if self.req.POST['action'] == ACTIONS[1]:
+            frm = self.req.POST['from']
         message.setdefault('event', 'send')
         message.setdefault('to', frm)
-        outboxMsg = OutboxMessage.objects.create(
-              to=message['to']
-            , message=message['message']
+        outbox_message = OutboxMessage.objects.create(
+            to=message['to'],
+            message=message['message']
         )
-        message['id'] = outboxMsg.pk
+        message['id'] = outbox_message.pk
         self.append(message)
 
     def send(self):
@@ -98,7 +103,7 @@ def validate_req(phone_number, password):
                     validate(req, attr)
                 except Exception, e:
                     return HttpResponse(e, status=400)
-            if req.POST['action'] not in InboxMessage.ACTIONS.values():
+            if req.POST['action'] not in ACTIONS.values():
                 e = 'invalid request action'
                 return HttpResponse(e, status=400)
             if phone_number != req.POST['phone_number']:
@@ -147,7 +152,7 @@ def handle_test_req(view):
 
 def validate_incoming_req(view):
     def wrapper(req):
-        if req.POST['action'] == InboxMessage.ACTIONS[1]:
+        if req.POST['action'] == ACTIONS[1]:
             for attr in [
                   'from'
                 , 'message_type'
@@ -164,7 +169,7 @@ def validate_incoming_req(view):
 
 def validate_outgoing_req(view):
     def wrapper(req):
-        if req.POST['action'] == InboxMessage.ACTIONS[2]:
+        if req.POST['action'] == ACTIONS[2]:
             pass
         return view(req)
     return wrapper
@@ -172,7 +177,7 @@ def validate_outgoing_req(view):
 
 def validate_send_status_req(view):
     def wrapper(req):
-        if req.POST['action'] == InboxMessage.ACTIONS[3]:
+        if req.POST['action'] == ACTIONS[3]:
             for attr in [
                   'id'
                 , 'status'
