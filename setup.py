@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-envaya',
-    version='0.0.4',
+    version='0.0.5',
     description='Tiny envaya utility',
     author='Mitchel Kelonye',
     author_email='kelonyemitchel@gmail.com',
