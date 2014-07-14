@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 
 APPLICATION = os.environ.get('DJANGO_APPLICATION_NAME')
@@ -10,16 +11,15 @@ DEBUG = TEMPLATE_DEBUG = True
 
 DATABASES = {
     'default': {
-          'ENGINE': 'django.db.backends.sqlite3'
-        , 'NAME': '%s.sqlite3' % APPLICATION
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '%s.sqlite3' % APPLICATION
     }
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ADMINS = (
-      ('TJ', 'tj@example.com')
-    , 
+    ('TJ', 'tj@example.com'), 
 )
 
 MANAGERS = ADMINS
@@ -52,17 +52,15 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_FINDERS = (
-      'django.contrib.staticfiles.finders.FileSystemFinder'
-    , 'django.contrib.staticfiles.finders.AppDirectoriesFinder'
-    , 
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder', 
 )
 
 SECRET_KEY = 'test secret'
 
 TEMPLATE_LOADERS = (
-      'django.template.loaders.filesystem.Loader'
-    , 'django.template.loaders.app_directories.Loader'
-    ,
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 )
 
 TEMPLATE_DIRS = (
@@ -70,17 +68,15 @@ TEMPLATE_DIRS = (
 )
 
 AUTHENTICATION_BACKENDS = (
-      'django.contrib.auth.backends.ModelBackend'
-    , 
+    'django.contrib.auth.backends.ModelBackend', 
 )
 
 MIDDLEWARE_CLASSES = (
-      'django.middleware.common.CommonMiddleware'
-    , 'django.contrib.sessions.middleware.SessionMiddleware'
-    , 'django.middleware.csrf.CsrfViewMiddleware'
-    , 'django.contrib.auth.middleware.AuthenticationMiddleware'
-    , 'django.contrib.messages.middleware.MessageMiddleware'
-    ,
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = '%s.urls' % APPLICATION
@@ -88,21 +84,19 @@ ROOT_URLCONF = '%s.urls' % APPLICATION
 WSGI_APPLICATION = '%s.wsgi.application' % APPLICATION
 
 TEST_EXCLUDE = (
-      'django.contrib.auth'
-    , 'django.contrib.contenttypes'
-    , 'django.contrib.sessions'
-    , 'django.contrib.sites'
-    , 'django.contrib.messages'
-    , 'django.contrib.staticfiles'
-    , 'django.contrib.admin'
-    , 'lib'
-    ,
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'lib',
 )
 
 INSTALLED_APPS = TEST_EXCLUDE + (
-      'core'
-    , 'message'
-    , 
+    'core',
+    'message', 
 )
 
 TEST_RUNNER = 'django_test_exclude.runners.ExcludeTestSuiteRunner'

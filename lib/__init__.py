@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.utils import simplejson as json
 from django.views.decorators.csrf import csrf_exempt
 from models import InboxMessage, OutboxMessage, ACTIONS
+from django.utils.decorators import decorator_from_middleware as use
 
 
 logger = logging.getLogger('envaya')
@@ -86,39 +87,54 @@ def validate(req, attr):
         raise Exception(e)
 
 
-def validate_req(phone_number, password):
+# middlewares
+
+
+def set_auth_params(phone_number, password):
+
     def wrapper(view):
         def func(req):
             req.auth_params = {
-                  'phone_number': phone_number
-                , 'password': password
+                'phone_number': phone_number,
+                'password': password
             }
-            if req.method != 'POST':
-                return HttpResponse(status=405)
-            for attr in [
-                  'phone_number'
-                , 'action'
-            ]:
-                try:
-                    validate(req, attr)
-                except Exception, e:
-                    return HttpResponse(e, status=400)
-            if req.POST['action'] not in ACTIONS.values():
-                e = 'invalid request action'
-                return HttpResponse(e, status=400)
-            if phone_number != req.POST['phone_number']:
-                e = 'request is from a forbiddened number'
-                return HttpResponse(e, status=403)
             return view(req)
         func.func_name = view.func_name
         return func
     return wrapper
 
-def auth_req(view):
-    def wrapper(req):
+
+class ValidateReq(object):
+    
+    def process_request(self, req):
+
+        if req.method != 'POST':
+            return HttpResponse(status=405)
+
+        for attr in [
+            'phone_number',
+            'action'
+        ]:
+            try:
+                validate(req, attr)
+            except Exception, e:
+                return HttpResponse(e, status=400)
+
+        if req.POST['action'] not in ACTIONS.values():
+            e = 'invalid request action'
+
+            return HttpResponse(e, status=400)
+        if req.auth_params['phone_number'] != req.POST['phone_number']:
+            e = 'request is from a forbiddened number'
+            return HttpResponse(e, status=403)
+
+
+class AuthReq(object):
+
+    def process_request(self, req):
 
         if len(sys.argv) > 1 and sys.argv[1] == 'test':
-            return view(req)
+            return
 
         def ksort(d):
             return [k for k in sorted(d.keys())]
@@ -137,79 +153,73 @@ def auth_req(view):
             e = 'wrong phone/password combination'
             return HttpResponse(e, status=403)
 
-        return view(req)
-    return wrapper
 
+class HandleTestReq(object):
 
-def handle_test_req(view):
-    def wrapper(req):
+    def process_request(self, req):
         if req.POST['action'] == 'test':
             e = 'OK'
             return HttpResponse(e)
-        return view(req)
-    return wrapper
 
 
-def validate_incoming_req(view):
-    def wrapper(req):
+class ValidateIncomingReq(object):
+
+    def process_request(self, req):
         if req.POST['action'] == ACTIONS[1]:
             for attr in [
-                  'from'
-                , 'message_type'
-                , 'message'
-                , 'timestamp'
+                'from',
+                'message_type',
+                'message',
+                'timestamp'
             ]:  
                 try:
                     validate(req, attr)
                 except Exception, e:
                     return HttpResponse(e, status=400)
-        return view(req)
-    return wrapper
 
 
-def validate_outgoing_req(view):
-    def wrapper(req):
+class ValidateOutgoingReq(object):
+
+    def process_request(self, req):
         if req.POST['action'] == ACTIONS[2]:
             pass
-        return view(req)
-    return wrapper
 
 
-def validate_send_status_req(view):
-    def wrapper(req):
+class ValidateSendStatusReq(object):
+
+    def process_request(self, req):
         if req.POST['action'] == ACTIONS[3]:
             for attr in [
-                  'id'
-                , 'status'
-                , 'error'
+                'id',
+                'status',
+                'error'
             ]:
                 try:
                     validate(req, attr)
                 except Exception, e:
                     return HttpResponse(e, status=400)
-        return view(req)
-    return wrapper
 
 
-def log(view):
-    def wrapper(req):
+class Log(object):
+
+    def process_request(self, req):
         logger.info('RECEIVING')
         for k, v in req.POST.iteritems():
             logger.info('%s: %s' % (k, v))
-        return view(req)
-    return wrapper
 
 
 def receive(phone_number, password):
+
     def wrapper(view):
         @csrf_exempt
-        @validate_req(phone_number, password)
-        @auth_req
-        @handle_test_req
-        @validate_incoming_req
-        @validate_outgoing_req
-        @validate_send_status_req
-        @log
+        @set_auth_params(phone_number, password)
+        @use(ValidateReq)
+        @use(AuthReq)
+        @use(HandleTestReq)
+        @use(ValidateIncomingReq)
+        @use(ValidateOutgoingReq)
+        @use(ValidateSendStatusReq)
+        @use(Log)
         def func(req):
             envaya = Envaya(req)
             req.envaya = envaya

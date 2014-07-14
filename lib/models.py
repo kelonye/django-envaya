@@ -8,7 +8,7 @@ from django.db.models.signals import post_save, pre_save
 
 
 ACTIONS = {
-    1 : 'incoming',
+    1: 'incoming',
     2: 'outgoing',
     3: 'send_status',
     4: 'device_status',
